@@ -1,0 +1,19 @@
+Dear {{ first_name }} {{ last_name }},
+
+Welcome aboard to WanderLust! 🌍✨ We're thrilled to have you join our community of adventurous souls who share a passion for exploration and discovery.
+
+Your username: {{ username }}
+
+At WanderLust, we're committed to making your travel dreams a reality. From breathtaking landscapes to hidden gems off the beaten path, we're here to help you create memories that will last a lifetime.
+
+In the coming days, keep an eye on your inbox as we'll be sending you updates on the status of your reservations, along with exclusive offers and insider tips to enhance your travel experience.
+
+If you have any questions or need assistance at any point, don't hesitate to reach out to our dedicated support team at [support email].
+
+Once again, welcome to WanderLust, {{first_name}}! Let's make every journey an adventure worth remembering.
+
+Happy travels!
+
+Warm regards,
+
+WanderLust Team

@@ -1,0 +1,130 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reserving</title>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<link rel="stylesheet" type="text/css" href="{% static '/css/light_mode.css' %}" >
+
+</head>
+<style>
+
+     .btn-custom {
+      background-color: #113F67;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin: 10px;
+      outline: none;
+    }
+
+    .btn-custom:hover {
+      background-color: #87C0CD;
+    }
+</style>
+<body>
+
+    <div class="container">
+        {% if user.is_authenticated %}
+        <h3><b style="color: #00ff00;">Connected</b> with <a href="{% url 'accounts:account' %}"><b style="color: black;">{{ user.username }}</b></a> | <a href="{% url 'accounts:logout' %}" class="btn btn-custom">Log-out</a></h3>
+        {% endif %}
+    </div>
+    
+    <a href="{% if payment_failed is True %}http://127.0.0.1:8000/home{% else %}http://127.0.0.1:8000/home/car_reservation/?{{Url}}{% endif %}" class="btn btn-primary btn-lg" role="button" >
+    <i class="bi bi-arrow-left"></i>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+    </svg>
+    </a>
+
+
+<div class="container">
+    {% if payment_failed is True %}
+      <div class="row">
+        <div class="col-md-6 offset-md-3">
+          <div class="error-message">
+          <center>
+            <b>
+            <h2 style="color: #ff0000;">Payment Failed!</h2>
+            <p>Unfortunately, your payment for car reservation was unsuccessful.</p>
+            <p>Please check your payment details and try again.</p>
+            <p>If the problem persists, please contact customer support.</p>
+            </b>
+          </center>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  <div id="searchResults" class = "result_container">
+    <p>Post data </p>
+    {{request.POST }}
+    <br>
+    <p>Get data </p>
+    {{ request.GET }}
+    <br>
+    <p>resultedcar </p>
+    {{ ResultedCars }}
+    <br>
+    <div id="Results" class="container mt-5">
+
+        <ul class="list-unstyled styled-list">
+            <a href="#" class="inactiveLink">
+            <li class="car-container">
+                <div class="img-wrapper car-image">
+                    <img src="{{ car.car_img.url }}" alt="Placeholder Image" class="item-image">
+                </div>
+                <div class="car-info">
+                    <p><b>Brand : </b> <span>{{ car.car_brand }}</span></p>
+                    <p><b>Model : </b><span>{{ car.car_model }}</span></p>
+                    <p><b>BaseModel : </b><span>{{ car.baseModel }}</span></p>
+                    <p><b>Class : </b><span>{{ car.Vehicle_Size_Class }}</span></p>
+                    <p><b>Location : </b><span>{{ car.car_current_location }}</span></p>
+
+                    <p><b>Description:</b><p> <span> Introducing the {{car.car_brand}} {{ car.car_model }}: a {{ car.Vehicle_Size_Class }} boasting {{ car.city_Mpg_For_Diesel }} city MPG(Diesel)</span></p>
+                    {% if car.Co2_fuel_Diesel == -1 %}
+                    <span>. An electric car powered </span>
+                    {% else %}
+                    <span> and {{ car.Co2_fuel_Diesel }} Co2 emissions. Powered</span>
+                    {% endif %}
+                    <span>by {{ car.Cylinders }}-cylinder engine with {{ car.Drvie }} drive and {{ car.Transmission }} transmission, it promises a smooth ride. Experience excellence with the {{ car.baseModel }}.</span>
+
+                    <p>
+                        <b>Price perday:</b><span> ${{ car.car_price_perday }}</span>
+                        <b style="padding-left: 10rem;">Price for {{ numofdays }} day{{ numofdays|pluralize }}: </b><span> ${{ amount }} </span>
+                    </p>
+
+                    {% if car.availability is True %}
+                    <p style="color: #FF1400;"> this car isn't gonna be free at {{ pick_up_time }} this day , instead {{ car.car_drop_off_time }} </p>
+                    {% elif car.availability is False %}
+                    <p style="color: orange;">this car is gonna be freed at the same time of your pick-up time so you may wait !</p>
+                    {% endif %}
+                    <br>
+                    {% if reserved is True %}
+                    <h4 class="color: red;"><b> This car was just reserved :( </b></h4>
+                    {% endif %}
+                    <a href="http://127.0.0.1:8000/home/car_reservation/car_reserve/paypalmiddle/{{car.car_id}}/?{{Url}}" class="btn btn-primary btn-lg btn-block {% if reserved is True %}disabled{% endif %}" role="button" ><b>Reserve Car</b></a>
+                </div>
+            </li>
+            </a>
+        </ul>
+    </div>
+  </div>
+</div>
+<script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

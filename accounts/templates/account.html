@@ -1,0 +1,256 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Account</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <link rel="stylesheet" type="text/css" href="{% static '/css/light_mode.css' %}" >
+    <style>
+        /* Add your custom CSS styling here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .sidebar {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            height: auto;
+        }
+        .nav-link {
+            color: #fff;
+        }
+        .nav-link:hover {
+            color: #ccc;
+        }
+        .content {
+            padding: 20px;
+        }
+        .car-info-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            border: 2px solid #113F67;
+            border-radius: 15px;
+            z-index: 1000;
+            max-width: 80%;
+            max-height: 80%;
+            overflow: auto;
+        }
+        @media (max-width: 768px) {
+            .car-info-popup {
+                max-width: 90%;
+            }
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: #fffdf8;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <a href="http://127.0.0.1:8000/home" class="btn btn-primary btn-lg" role="button" >
+    <i class="bi bi-arrow-left"></i>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+    </svg>
+    </a>
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar">
+                <div class="sidebar-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#account-info">Account Information</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#bookings">Bookings</a>
+                            <ul class="nav flex-column ml-3">
+                                <li class="nav-item"><a class="nav-link" href="#hotels">Hotels</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#cars">Cars</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#flights">Flights</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#attractions">Attractions</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+                <div class="content">
+                    <h1 id="account-info">Account Information</h1>
+                      <div id="searchResults" class = "result_container">
+                        <div id="Results" class="container mt-5">
+                            <ul class="list-unstyled styled-list">
+                                <li class="car-container" style="color: white;">
+                                    <div class="car-info">
+                                        <br/>
+                                        <h3><b><i>First name: </i></b> {{ user.first_name }} </h3>
+                                        <br/>
+                                        <h3><b><i>Last name: </i></b> {{ user.last_name }} </h3>
+                                        <br/>
+                                        <h3><b><i>Username: </i></b> {{ user.username }} </h3>
+                                        <br/>
+                                        <h3><b><i>Email: </i></b> {{ user.email }} </h3>
+                                        <br/>
+                                        <h3><b><i>Last Login: </i></b> {{ user.last_login }} </h3>
+                                        <br/>
+                                        <h3><b><i>Date joined: </i></b> {{ user.date_joined }} </h3>
+                                        <br/>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                      </div>
+                      <center><h2 id="bookings">Bookings</h2></center>
+                    <h3 id="hotels">Hotels</h3>
+                    <p>his hotels</p>
+                    <h3 id="cars">Cars</h3>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Invoice ID</th>
+                                <th>Amount</th>
+                                <th>Booking Date</th>
+                                <th>Booking info</th>
+                                <th>Car</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for invoice in invoices %}
+                            <tr>
+                                <td>{{ invoice.booking_id }}</td>
+                                <td>${{ invoice.amount }}</td>
+                                <td>{{ invoice.booking_date|date:"j F Y" }}</td>
+                                <td>
+                                   <table style="font-size: 10px;">
+                                       <tr>
+                                         <td>Pick-up date</td>
+                                         <td>{{ invoice.pick_up_date }}</td>
+                                         <td>Pick-up time</td>
+                                         <td>{{ invoice.pick_up_time }}</td>
+                                       </tr>
+                                       <tr>
+                                         <td>Drop-off date</td>
+                                         <td>{{ invoice.drop_off_date }}</td>
+                                         <td>Drop-off time</td>
+                                         <td>{{ invoice.drop_off_time }}</td>
+                                       </tr>
+                                   </table>
+                                </td>
+                                <td>
+                                    <center><button type="button" class="btn btn-info btn-sm" onclick="showCarInfo('{{ invoice.car_id.car_id }}')">Show Car Info</button></center>
+                                    <div id="car-info-{{ invoice.car_id.car_id }}" class="car-info-popup">
+                                    <div class = "car-container">
+                                        <div class="img-wrapper car-image">
+                                              <img src="{{ invoice.car_id.car_img.url }}" alt="Placeholder Image" class="item-image">
+                                        </div>
+
+                                        <div class = "car-info">
+                                          <p><b>Brand : </b> <span>{{ invoice.car_id.car_brand }}</span></p>
+                                          <p><b>Model : </b><span>{{ invoice.car_id.car_model }}</span></p>
+                                          <p><b>BaseModel : </b><span>{{ invoice.car_id.baseModel }}</span></p>
+                                          <p><b>Class : </b><span>{{ invoice.car_id.Vehicle_Size_Class }}</span></p>
+                                          <p><b>Location : </b><span>{{ invoice.car_id.car_current_location }}</span></p>
+
+                                          <p><b>Description:</b><p> <span> Introducing the {{invoice.car_id.car_brand}} {{ invoice.car_id.car_model }}: a {{ invoice.car_id.Vehicle_Size_Class }} boasting {{ invoice.car_id.city_Mpg_For_Diesel }} city MPG(Diesel)</span></p>
+                                          {% if invoice.booking_id.car_id.Co2_fuel_Diesel == -1 %}
+                                            <span>. An electric car powered </span>
+                                          {% else %}
+                                            <span> and {{ invoice.car_id.Co2_fuel_Diesel }} Co2 emissions. Powered</span>
+                                          {% endif %}
+                                            <span>by {{ invoice.car_id.Cylinders }}-cylinder engine with {{ invoice.car_id.Drvie }} drive and {{ invoice.car_id.Transmission }} transmission, it promises a smooth ride. Experience excellence with the {{ invoice.car_id.baseModel }}.</span>
+                                          <p>
+                                            <b>Price perday:</b><span> ${{ invoice.car_id.car_price_perday }}</span>
+                                          </p>
+
+                                        </div>
+                                    </div>
+                                        <button type="button" class="btn btn-danger btn-lg btn-block" onclick="hideCarInfo('{{ invoice.car_id.car_id }}')">Close</button>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if invoice.car_id.booked is True %}
+                                        {% if invoice.canceled is False %}
+                                            <center><b style="color: #00ff00;">Booked</b></center>
+                                        {% else %}
+                                            <center><b style="color: #FF6E00;">Canceled</b></center>
+                                        {% endif %} 
+                                    {% else %}
+                                        {% if invoice.canceled is False %}
+                                            <center><b style="color: #ff0000;">Dropped-off</b></center>
+                                        {% else %}
+                                            <center><b style="color: #FF6E00;">Canceled</b></center>
+                                        {% endif %} 
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <center><a href="{% url 'accounts:cancel_car_booking' invoice_id=invoice.booking_id %}" class="btn {% if invoice.canceled is False %}btn-danger{% else %}btn-warning{% endif %} {% if invoice.car_id.booked is True %}active{% elif invoice.car_id.booked is False %}disabled{% endif %}" role="button" aria-pressed="true" >{% if invoice.canceled is False %}Cancel Booking{% else %}Booking Canceled{% endif %}</a></center>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <script>
+                    let currentOpenPopup = null;
+
+                    function showCarInfo(carId) {
+                        if (currentOpenPopup !== null) {
+                            currentOpenPopup.style.display = 'none';
+                        }
+
+                        const popup = document.getElementById('car-info-' + carId);
+                        popup.style.display = 'block';
+                        currentOpenPopup = popup;
+                    }
+
+                    function hideCarInfo(carId) {
+                        const popup = document.getElementById('car-info-' + carId);
+                        popup.style.display = 'none';
+                        currentOpenPopup = null;
+                    }
+
+                    </script>
+                    <h3 id="flights">Flights</h3>
+                    <p>his flights </p>
+                    <h3 id="attractions">Attractions</h3>
+                    <p>his attractions</p>
+                </div>
+            </main>
+        </div>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Success</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static '/css/light_mode.css' %}" >
+  <style>
+    .invoice {
+      background-color: #226597;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
+     .btn-custom {
+      background-color: #113F67;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin: 10px;
+      outline: none;
+    }
+
+    .btn-custom:hover {
+      background-color: #87C0CD;
+    }
+  </style>
+</head>
+<body>
+    <div class="container">
+        {% if user.is_authenticated %}
+        <h3><b style="color: #00ff00;">Connected</b> with <a href="{% url 'accounts:account' %}"><b style="color: black;">{{ user.username }}</b></a> | <a href="{% url 'accounts:logout' %}" class="btn btn-custom">Log-out</a></h3>
+        {% endif %}
+    </div>
+
+    <a href="http://127.0.0.1:8000/home" class="btn btn-primary btn-lg" role="button" >
+    <i class="bi bi-arrow-left"></i>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+    </svg>
+    </a>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <div class="invoice">
+          <center>
+            <h3 style="color: #00ff00;">Payment Successful!</h3>
+            <b><p>Your payment for car reservation has been successfully processed.</p></b>
+          </center>
+      </div>
+      <div class="invoice">
+        <h2 class="text-center mb-4" style="color: #00ff00;">Invoice</h2>
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Reservation ID:</strong> #123456</p>
+            <p><strong>Date:</strong> February 28, 2024</p>
+          </div>
+          <div class="col-md-6">
+              <p><strong>Total Amount:</strong> ${{ amount }}</p>
+            <p><strong>Payment Method:</strong> Credit Card</p>
+          </div>
+        </div>
+      </div>
+    </div>
+      <ul class="list-unstyled styled-list">
+          <li class = "car-container">
+              <div class="img-wrapper car-image">
+                    <img src="{{ car.car_img.url }}" alt="Placeholder Image" class="item-image">
+              </div>
+
+              <div class = "car-info">
+                <p><b>Brand : </b> <span>{{ car.car_brand }}</span></p>
+                <p><b>Model : </b><span>{{ car.car_model }}</span></p>
+                <p><b>BaseModel : </b><span>{{ car.baseModel }}</span></p>
+                <p><b>Class : </b><span>{{ car.Vehicle_Size_Class }}</span></p>
+                <p><b>Location : </b><span>{{ car.car_current_location }}</span></p>
+
+                <p><b>Description:</b><p> <span> Introducing the {{car.car_brand}} {{ car.car_model }}: a {{ car.Vehicle_Size_Class }} boasting {{ car.city_Mpg_For_Diesel }} city MPG(Diesel)</span></p>
+                {% if car.Co2_fuel_Diesel == -1 %}
+                  <span>. An electric car powered </span>
+                {% else %}
+                  <span> and {{ car.Co2_fuel_Diesel }} Co2 emissions. Powered</span>
+                {% endif %}
+                  <span>by {{ car.Cylinders }}-cylinder engine with {{ car.Drvie }} drive and {{ car.Transmission }} transmission, it promises a smooth ride. Experience excellence with the {{ car.baseModel }}.</span>
+
+                <p>
+                    <b>Price perday:</b><span> ${{ car.car_price_perday }}</span>
+                    <b style="padding-left: 10rem;">Price for {{ numofdays }} day{{ numofdays|pluralize }}: </b><span> ${{ amount }} </span>
+                </p>
+              </div>
+          </li>
+      </ul>
+  </div>
+</div>
+
+</body>
+</html>

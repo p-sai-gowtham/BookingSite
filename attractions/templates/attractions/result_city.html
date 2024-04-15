@@ -1,0 +1,314 @@
+{% load static %}
+{% load ratings %}
+<!DOCTYPE html>
+<html lang="en">
+  <link rel="stylesheet" href="{% static 'star-ratings/css/star-ratings.css' %}">
+  <script type="text/javascript" src="{% static 'star-ratings/js/dist/star-ratings.min.js' %}"></script>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+  <link rel="stylesheet" href="{% static 'attractions/css/act.css'%}">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Attractions Page</title>
+    
+  </head>
+  <style>
+        /* Style for modal */
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.8);
+        }
+        
+        .pop-date {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+        .errs {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Modal content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 40%; 
+            border-radius: 30px;
+        }
+
+        /* Close button */
+        .closee {
+            color: #aaa;
+            position: absolute; 
+            top: 10px; 
+            right: 20px; 
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .closee:hover,
+        .closee:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+  <body>
+      <select id="category-dropdown" name="category">
+          <option value="Nature" {% if category == 'Nature' %} selected {% endif %}>Nature</option>
+          <option value="Adventure" {% if category == 'Adventure' %} selected {% endif %}>Adventure</option>
+          <option value="Culture" {% if category == 'Culture' %} selected {% endif %}>Culture</option>
+      </select>
+      <form method="get" action="{% url 'attractions:activities' category=category %}" >
+          <select id="city" name="city" class="form-select form-select-lg mb-4 form-control" style="width: 200px;" aria-label=".form-select-lg">
+              <option value="London - UK" {% if "London" in city %}selected{% endif %}>London - Uk</option>
+              <option  value="New York - USA" {% if "New York" in city %}selected{% endif %}>New York - USA</option>
+              <option  value="Paris - France" {% if "Paris" in city %}selected{% endif %}>Paris - France</option>
+              <option value="Rome - Italy" {% if "Rome" in city%}selected{% endif %}>Rome - Italy</option>
+              <option  value="Maldives" {% if "Maldives" in city %}selected{% endif %}>Maldives</option>
+              <option  value="Barcelona - Spain" {% if "Barcelona" in city %}selected{% endif %}>Barcelona - Spain</option>
+          </select>
+          <input type="text" name="a" {% if query is not None and query|length != 0 %}value="{{query}}"{% else %}placeholder="Name your activity"{% endif %} required>
+          {{ form.booking_date.label_tag }}
+          {{ form.booking_date }}
+          <button type="submit">Search</button>
+      </form>
+      {% if query is None %}
+      <center><h1><b>{{ Category }} attractions in {{ city }}!</b></h1></center>
+      <center><h1><b>You can search for your attraction by its name and date !</b></h1></center>
+      {% else %}
+        {% if activities|length != 0 %}
+              <h3><b> {{ activities|length }} {{ category }}  attraction{{ activities|length|pluralize }} found in {{ city }}!</b></h3>
+        {% else %}
+            <h3><b>No {{ category }} attractions found in {{ city }} at {{ booking_date }} !</b></h3>
+        {% endif %}
+      {% endif %}
+        <ul> 
+            {% for activity, activitydate in activities_with_dates %}
+            <li>
+                <p><b>Title : </b> <span>{{ activity.title }}</span></p>
+                <p><b>Category : </b><span>{{activity.category}}</span></p>
+                <p><b>Description : </b><span>{{ activity.description }}</span></p>
+                <p><b>Available at : </b><span>{{ activitydate }}</span></p>
+                <p><b>Ticket Price : </b><span>{{ activity.pricea|floatformat:"-2" }}$</span></p>
+                <button onclick="openModal('{{ activity.title }}', {{ activity.pricea }}, '{{ activity.activity_id }}', '{{ activitydate }}')">Get a ticket</button>
+            </li>
+            {% endfor %} 
+        </ul>
+        <div id="myModal" class="modal">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span class="closee" onclick="closeModal()">&times;</span>
+                <center><h2><b>Book Attraction</b></h2></center>
+                <form id="bookingForm">
+                    <p><b>Activity name: </b><span id="activity_name"></span></p>
+                    <p><b>Activity starts at: </b><span id="activity_date"></span></p>
+                    {% csrf_token %}
+                    <p id="pop_up_date" class="pop-date"><b>Select your arrival date:</b>{{ dateform.pop_booking_date }} </p>
+                    {{ form.num_tickets.label_tag }}
+                    {{ form.num_tickets }}
+                    <br>
+                    <p id="ticket_price"></p>
+                    <p id="total_price"></p>
+                    <p id="errors" class="errs">
+                    {% if available_tickets == 0 %}
+                        <b style="color: red;">The tickets just run out :(</b>
+                    {% elif available_tickets < tickets_num %}
+                        <b style="color: orange;">There are right now {{ available_tickets }} ticket{{ available_tickets|length|pluralize }} left, so consider lowering you tickets</b>
+                    {% endif %}
+                    </p>
+                    <button type="button" class="btn btn-primary btn-lg btn-block {% if available_tickets == 0 %}disabled{% endif %}" role="button" id="payNow"{% if available_tickets == 0 %} disabled{% endif %}>Pay Now</button>
+                </form>
+            </div>
+        </div>
+
+</body>
+<script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    var currentActivity = null;
+    var currentprice = null;
+    var activityDate = null;
+</script>
+
+<script>
+    var modal = document.getElementById("myModal");
+
+    function openModal(title, price, activityId, activityd) {
+        var actid = "{{ activityid }}";
+        console.log("actid : ", actid);
+        console.log("activityd : ", activityId);
+        if (actid != activityId){
+            document.getElementById("errors").style.display = "none";
+            document.getElementById("payNow").classList.remove("disabled");
+            document.getElementById("payNow").removeAttribute("disabled");
+        }else {
+            document.getElementById("errors").style.display = "block";
+        }
+        currentActivity = activityId;
+        currentprice = price;
+        activityDate = activityd
+        document.getElementById("activity_name").innerHTML = title;
+        document.getElementById("activity_date").innerHTML = activityd;
+        document.getElementById("ticket_price").innerHTML = "Price for one ticket: " + price + "$";
+        document.getElementById("total_price").innerHTML = "Total price: " + price + "$";
+        document.getElementById("id_num_tickets").value = "1";
+        document.getElementById("id_pop_booking_date").value = '';
+        pop_up_date.style.display = "none";
+        pop_up_date.value = '';
+        modal.style.display = "block";
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+document.getElementById("id_num_tickets").addEventListener("change", updateTotal);
+
+    function updateTotal() {
+        var price = parseFloat(currentprice);
+        var numTickets = parseInt(document.getElementById("id_num_tickets").value);
+        var totalPrice = price * numTickets;
+        document.getElementById("total_price").innerHTML = "Total price: " + totalPrice.toFixed(2) + "$";
+    }
+        document.getElementById("payNow").addEventListener("click", function() {
+                var numTickets = document.getElementById("id_num_tickets").value;
+                var bookingDate = document.getElementById("id_booking_date").value || document.getElementById("id_pop_booking_date").value; 
+                var currentUrl = window.location.href;
+
+                if (!(currentUrl.includes('booking_date')) && !(bookingDate)){
+                    alert("Please set your arrival date");
+
+                    var pop_up_date = document.getElementById("pop_up_date");
+                    document.getElementById("id_pop_booking_date").value = activityDate;
+                    pop_up_date.style.display = "block";
+                    // very important : make all the dates before today unclickable in the date calender 
+                    document.getElementById("id_pop_booking_date").focus();
+                    return;
+                }
+                if (currentUrl.includes('booking_date')){
+                    bookingDate = "{{ booking_date }}"
+                }
+                
+                // here check if the activityDate >= bookingDate
+                date1 = new Date(activityDate)
+                date2 = new Date(bookingDate)
+
+                if (date1!=date2 && date1 < date2){
+                    alert("You can't book this activity cuz you'll miss it");
+
+                    var pop_up_date = document.getElementById("pop_up_date");
+                    pop_up_date.style.display = "block";
+                    // very important : make all the dates before today unclickable in the date calender 
+                    document.getElementById("id_pop_booking_date").focus();
+
+                    return;
+                }
+
+                var queryParams = '';
+                if (currentUrl.includes('?')){
+                    queryParams = currentUrl.split('?')[1];
+                }
+
+                var url = "http://127.0.0.1:8000/attractions/activities/{{category}}/activity_reserve/paypalmiddle/" + currentActivity + "/Activity/?";
+                if (queryParams) {
+                    url += queryParams;
+                }
+
+                if (url.includes('booking_date')){
+                    url += "&numt=" + numTickets;
+                }else {
+                    url += "&booking_date=" + bookingDate + "&numt=" + numTickets;
+                }
+
+                window.location.href = url;
+            });
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var currenturl = window.location.href;
+    if (currenturl.includes('booking_failed')){
+        currenturl = currenturl.substring(0, currenturl.lastIndexOf('&')) 
+        history.pushState(null, null, currenturl);
+        alert("Your booking failed :(");
+    }
+
+    document.getElementById("id_booking_date").value = "{{ booking_date }}";
+    var availableTickets = "{{ available_tickets }}";
+    var ticketsNum = "{{ tickets_num }}";
+
+    // Check if available_tickets and tickets_num are present
+    if (availableTickets !== undefined && ticketsNum !== undefined) {
+        // Check if available_tickets < tickets_num or available_tickets = 0
+        var availableTickets = parseInt(availableTickets);
+        var ticketsNum = parseInt(ticketsNum);
+        if (availableTickets < ticketsNum || availableTickets === 0) {
+            // just removing some params
+            var currenturl = window.location.href;
+            currenturl = currenturl.substring(0, currenturl.lastIndexOf('&')) 
+            currenturl = currenturl.substring(0, currenturl.lastIndexOf('&')) 
+            currenturl = currenturl.substring(0, currenturl.lastIndexOf('&')) 
+            history.pushState(null, null, currenturl);
+
+            var activityTitle = "{{ activitytitle }}";
+            var activityPrice = "{{ activityprice }}";
+            var activityId = "{{ activityid }}";
+            var activityd = "{{ actd }}";
+
+            openModal(activityTitle, activityPrice, activityId, activityd);
+        }
+    }
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var categoryDropdown = document.getElementById("category-dropdown");
+    categoryDropdown.addEventListener("change", function() {
+        var selectedCategory = categoryDropdown.value;
+        var currentUrl = window.location.href;
+
+        var queryParams = null; 
+        var baseUrl = currentUrl;
+        
+        var x = baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1);
+        if (x == baseUrl.length){
+            baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/')); 
+        }
+
+
+        if (currentUrl.includes('?')){
+            var baseUrl = currentUrl.split('?')[0];
+
+            baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/')); 
+
+            var queryParams = currentUrl.split('?')[1];
+        }
+
+        var newBaseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1);
+        var newUrl = newBaseUrl + selectedCategory + '/';
+        if (queryParams) {
+            newUrl += '?' + queryParams;
+        }
+        history.pushState(null, null, newUrl);
+        window.location.href = newUrl;
+    });
+});
+</script>
+</html>

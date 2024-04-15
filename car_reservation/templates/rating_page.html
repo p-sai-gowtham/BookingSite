@@ -1,0 +1,59 @@
+{% load static %}
+{% load ratings %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{% static 'star-ratings/css/star-ratings.css' %}">
+    <script type="text/javascript" src="{% static 'star-ratings/js/dist/star-ratings.min.js' %}"></script>
+</head>
+
+<style>
+        body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #113F67;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 1.0);
+        text-align: center;
+    }
+
+    h1 {
+        color: #333;
+    }
+
+    p {
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    #ratingStars {
+        font-size: 36px;
+        margin-top: 30px;
+    }
+
+</style>
+<body>
+    <div class="container">
+        <h1>Thank You for Confirming Car Drop-Off</h1>
+        <p>We appreciate your confirmation. Please take a moment to rate your experience:</p>
+        <div id="ratingStars">
+            <!-- the problem here is that the user have only one time rate a certain car -->
+            {% ratings car icon_height=30 icon_width=30 read_only=False %}
+        </div>
+    </div>
+
+<script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

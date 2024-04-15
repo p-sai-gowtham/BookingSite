@@ -1,0 +1,10 @@
+Todo:
+1. Add review code ( look at car_reservation/templates/car_search.html , and for rating I'm using car_reservation/templates/rating_page.html )
+2. Disable the days before today in the date calender form
+3. Add the pagination using the Paginator ( look at my code at car_reservation/views.py/ -->  search view )
+4. Add filtering by rating and price ( see my car_reservation/templates/car_search.html scripts and search view )
+
+for me : 
+1. Add in the tasks email sending for attraciotns
+2. Add email sending when payment is successfully
+

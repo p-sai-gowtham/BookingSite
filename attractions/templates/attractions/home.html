@@ -1,0 +1,98 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{% static 'attractions/css/act.css'%}">
+<title>Awesome Homepage</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 50px auto;
+        text-align: center;
+    }
+
+    h1 {
+        color: #333;
+    }
+
+    .category {
+        display: inline-block;
+        margin: 20px;
+        padding: 20px;
+        border-radius: 10px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+
+    .category:hover {
+        transform: scale(1.05);
+    }
+
+    .category h2 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .category p {
+        color: #666;
+    }
+
+    .category img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        margin-bottom: 20px;
+        object-fit: cover;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Welcome to Our Awesome Website!</h1>
+    <div class="category" onclick="redirectToCategory('Nature')">
+        <img src="nature.jpg" alt="Nature">
+        <h2>Nature</h2>
+        <p>Explore the beauty of nature</p>
+    </div>
+    <div class="category" onclick="redirectToCategory('Adventure')">
+        <img src="adventure.jpg" alt="Adventure">
+        <h2>Adventure</h2>
+        <p>Embark on thrilling adventures</p>
+    </div>
+    <div class="category" onclick="redirectToCategory('Culture')">
+        <img src="culture.jpg" alt="Culture">
+        <h2>Culture</h2>
+        <p>Discover diverse cultures around the world</p>
+    </div>
+</div>
+
+<script>
+function redirectToCategory(category) {
+    var currentUrl = window.location.href;
+    var queryParams = null; 
+    var baseUrl = currentUrl;
+    if (currentUrl.includes('?')){
+        var queryParams = currentUrl.split('?')[1];
+    }
+    newUrl = 'activities/' + category + '/';
+    if (queryParams) {
+        newUrl += '?' + queryParams;
+    }
+    window.location.href = newUrl;
+}
+</script>
+
+</body>
+</html>

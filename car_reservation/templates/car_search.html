@@ -1,0 +1,515 @@
+{% load static %}
+{% load ratings %}
+{% load multiplier %}
+{% load widget_tweaks %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Page</title>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<link rel="stylesheet" href="{% static 'star-ratings/css/star-ratings.css' %}">
+<script type="text/javascript" src="{% static 'star-ratings/js/dist/star-ratings.min.js' %}"></script>
+
+<link rel="stylesheet" type="text/css" href="{% static '/css/light_mode.css' %}" >
+</head>
+<style>
+    #searchForm {
+        width: 0 auto;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .form-control {
+        height: 100px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 1.2);
+    }
+
+    .form-group:last-child {
+        margin-right: 0;
+    }
+    .form-group-container {
+        display: grid;
+        justify-content: center;
+        grid-template-columns: 250px 450px 100px;
+        margin: 0 auto;
+    }
+
+    #left-sidebar {
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        background-color: #f8f9fa;
+        padding: 20px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    #left-sidebar h2 {
+        margin-top: 0;
+    }
+
+    #star-rating-filter,
+    #price-range-filter {
+        margin-bottom: 20px;
+    }
+
+
+    .error-message{
+        color: white;
+        display: None;
+    }
+
+    .price-filter {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .price-filter label {
+        margin-bottom: 5px;
+    }
+
+    .price-filter input[type="number"] {
+      width: 100px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .price-filter button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .price-filter button:hover {
+      background-color: #0056b3;
+    }
+
+    .star-rating-filter {
+      margin-bottom: 20px;
+    }
+
+    .star-rating-filter label {
+      font-weight: bold;
+    }
+
+    .stars {
+      cursor: pointer;
+    }
+
+    .stars .star {
+      font-size: 30px;
+      color: #ccc;
+    }
+
+    .stars .star:hover,
+    .stars .star.selected {
+      color: #ffd700; 
+    }
+
+
+
+    .btn-custom {
+     background-color: #113F67;
+     color: white;
+     border: none;
+     padding: 15px 30px;
+     font-size: 18px;
+     font-weight: bold;
+     text-transform: uppercase;
+     letter-spacing: 1px;
+     cursor: pointer;
+     transition: background-color 0.3s ease;
+     margin: 10px;
+     outline: none;
+    }
+
+    .btn-custom:hover {
+      background-color: #87C0CD;
+    }
+</style>
+<body>
+
+    <div class="container">
+        {% if user.is_authenticated %}
+        <h3><b style="color: #00ff00;">Connected</b> with <a href="{% url 'accounts:account' %}"><b style="color: black;">{{ user.username }}</b></a> | <a href="{% url 'accounts:logout' %}" class="btn btn-custom">Log-out</a></h3>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <a href="{% url 'attractions:categories' %}?city={{city}}" class="btn btn-primary btn-lg active" role="button">Attractions</a>
+    </div>
+
+    <a href="http://127.0.0.1:8000/home/" class="btn btn-primary btn-lg" role="button" >
+    <i class="bi bi-arrow-left"></i>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+    </svg>
+    </a>
+
+    {% if ResultedCars|length != 0 %}
+    <div id="left-sidebar">
+        <!-- star rating filter -->
+        <div id="star-rating-filter" data-url="{{ Url }}" data-selected-rating="{{ selected_rating }}">
+            <b>Filter by Rating:</b>
+            <div class="stars" id="star-rating">
+                <span class="star" data-value="1">&#9733;</span>
+                <span class="star" data-value="2">&#9733;</span>
+                <span class="star" data-value="3">&#9733;</span>
+                <span class="star" data-value="4">&#9733;</span>
+                <span class="star" data-value="5">&#9733;</span>
+            </div>
+        </div>
+
+        <!-- price range filter -->
+        <div id="price-range-filter" class="price-filter" data-url="{{ Url }}">
+            <b style="margin-bottom: 5px;">Filter by Price:</b>
+            <input style="width: 130px;"type="number" id="min-price" name="min-price" placeholder="Min Price" value="{{min_price|floatformat:"-2"}}">
+            <input style="width: 130px;" type="number" id="max-price" name="max-price" placeholder="Max Price" value="{{max_price|floatformat:"-2"}}">
+            <button id="apply-filter" style="width: 130px;margin-bottom: 4px;">Apply Filter</button>
+            <button id="clear-filter" class="btn btn-secondary" style="width: 130px;">Clear Filter</button>
+            <div id="error-container" class="error-message"></div>
+        </div>
+    </div>
+    {% endif %}
+
+<div class="container">
+    <center><h1>Car Search</h1></center>
+    <form id="searchForm" autocomplete="off" method="get" action="{% url 'search' %}">
+        {% comment %}
+        <!-- doesn't matter cuz I'm using GET -->
+            {% csrf_token %}
+        {% endcomment %}
+        
+        <div class="row g-3">
+            <div class="form-group-container">
+            <select id="city" name="city" class="form-select form-select-lg mb-4 form-control" style="width: 200px;" aria-label=".form-select-lg">
+              <option value="London - UK" {% if "London" in city %}selected{% endif %}>London - Uk</option>
+              <option  value="New York - USA" {% if "New York" in city %}selected{% endif %}>New York - USA</option>
+              <option  value="Paris - France" {% if "Paris" in city %}selected{% endif %}>Paris - France</option>
+              <option value="Rome - Italy" {% if "Rome" in city%}selected{% endif %}>Rome - Italy</option>
+              <option  value="Maldives" {% if "Maldives" in city %}selected{% endif %}>Maldives</option>
+              <option  value="Barcelona - Spain" {% if "Barcelona" in city %}selected{% endif %}>Barcelona - Spain</option>
+            </select>
+
+            <div>
+
+            {% render_field form.date class+="form-control" id="datepicker" style+="width: 400px;margin-bottom: 10px;" %}
+
+            {% if no_datetime is True %}
+                <center><b style="color: #ff0000;">Choose your period!</b></center>
+            {% endif %}
+            </div>
+
+
+            <button type="submit" class="btn btn-primary form-control" style="width: 150px;">Search</button>
+            
+        </div>
+        </div>
+    </form>
+
+
+    <!-- just for debuggin
+    <p>Post data </p>
+    {{request.GET }}
+    <br>
+    <p>get data </p>
+    {{ request.get }}
+    <br>
+    <p>url </p>
+    {{ Url }}
+    <br>
+    -->
+
+<!-- Caution !: alotta shit is going on here -->
+<div id="Results" class="container mt-5">
+    {% if request.method == "GET" %}
+    {% if long is False or long is not True %}
+        {% if ResultedCars|length != 0 %}
+            {% if not "date" in request.GET%}
+                <center><h2><b> All the available cars in {{ city }}, specify your pick-up and drop-off datetime </b></h2></center>
+            {% else %}
+                <center><h1><b>Search Results</b></h1></center>
+            {% endif %}
+
+            <h5><b> {{ ResultedCars.paginator.count }} car{{ ResultedCars.paginator.count|pluralize }} found !</b></h5>
+            <ul class="list-unstyled styled-list">
+
+            {% for car in ResultedCars %}
+                <a href="car_reserve/?{{Url}}&?page={{ResultedCars.number}}&carId={{ car.car_id }}" >
+                    <li class = "car-container">
+                        <div class="img-wrapper car-image">
+                              <img src="{{ car.car_img.url }}" alt="Placeholder Image" class="item-image">
+                        </div>
+
+                        <div class = "car-info">
+                          <p><b>Brand : </b> <span>{{ car.car_brand }}</span></p>
+                          <p><b>Model : </b><span>{{ car.car_model }}</span></p>
+                          <p><b>BaseModel : </b><span>{{ car.baseModel }}</span></p>
+                          <p><b>Class : </b><span>{{ car.Vehicle_Size_Class }}</span></p>
+                          <p><b>Location : </b><span>{{ car.car_current_location }}</span></p>
+
+                          <p><b>Description:</b><p> <span> Introducing the {{car.car_brand}} {{ car.car_model }}: a {{ car.Vehicle_Size_Class }} boasting {{ car.city_Mpg_For_Diesel }} city MPG(Diesel)</span></p>
+                          {% if car.Co2_fuel_Diesel == -1 %}
+                            <span>. An electric car powered </span>
+                          {% else %}
+                            <span> and {{ car.Co2_fuel_Diesel }} Co2 emissions. Powered</span>
+                          {% endif %}
+                            <span>by {{ car.Cylinders }}-cylinder engine with {{ car.Drvie }} drive and {{ car.Transmission }} transmission, it promises a smooth ride. Experience excellence with the {{ car.baseModel }}.</span>
+
+                          <p>
+                            <b>Price perday:</b><span> ${{ car.car_price_perday|floatformat:"-2" }}</span>
+                            <b style="padding-left: 10rem;">Price for {{ numofdays }} day{{ numofdays|pluralize }}: </b><span> ${{ car.car_price_perday|multiply:numofdays|floatformat:"-2" }} </span>
+                          </p>
+
+                          {% if car.availability is True %}
+                            <p style="color: #FF1400;"> this car isn't gonna be free at {{ pick_up_time }} this day , instead {{ car.car_drop_off_time }} </p>
+                          {% elif car.availability is False %}
+                            <p style="color: orange;">this car is gonna be freed at the same time of your pick-up time so you may wait !</p>
+                          {% endif %}
+                          {% if car.ratings_average is not null %}
+                              {% ratings car read_only=True %}
+                          {% else %}
+                            <p style="color: orange;">This is car has no ratings, be the first one to rate it !</p>
+                          {% endif %}
+                                
+                          <a href="car_reserve/paypalmiddle/{{car.car_id}}/Car/?{{Url}}" class="btn btn-primary btn-lg btn-block {% if reserved is True %}disabled{% endif %}" role="button" ><b>Reserve Car</b></a>
+                        </div>
+                    </li>
+                </a>
+            {% endfor %}
+            </ul>
+
+            <nav aria-label="pagination">
+                <ul class="pagination">
+                <li class="page-item {% if not ResultedCars.has_previous %}disabled{% endif %}">
+                    <a class="page-link" {% if ResultedCars.has_previous %}href="?{{Url}}&?page={{ResultedCars.previous_page_number}}"{% endif %}>Previous</a>
+                </li>
+                {% for page_number in ResultedCars.paginator.page_range %}
+                    <li class="page-item  {% if page_number == ResultedCars.number %}active{% endif %}" aria-current="page">
+                        <a class="page-link" href="?{{Url}}&?page={{page_number}}">{{ page_number }}</a>
+                    </li>
+                {% endfor %}
+
+                <li class="page-item {% if not ResultedCars.has_next %}disabled{% endif %}">
+                    <a class="page-link" {% if ResultedCars.has_next %}href="?{{Url}}&?page={{ResultedCars.next_page_number}}"{% endif %}>Next</a>
+                </li>
+                <li class="page-item {% if not ResultedCars.has_next %}disabled{% endif %}">
+                    <a class="page-link" {% if ResultedCars.has_next %}href="?{{Url}}&?page={{ResultedCars.paginator.num_pages}}"{% endif %}>Last</a>
+                </li>
+                </ul>
+            </nav>
+
+        {% else %}
+            {% if request.GET|length != 0 %}
+                {% if "date" in request.GET %}
+                    <center><h2><b> No Results Found in {{ city }} at {{ pick_up_date }} ( {{ pick_up_time }} )</b></h2>
+                        {% if pick_up_date == the_date_today and pick_up_time <= the_time_today or pick_up_date < the_date_today %}
+                            <p><b style="color: red;"> Your pick-up date/time is older than today ! </b></p>
+                        {% endif %} 
+                    </center>
+                {% else %}
+                    {% if 'selected_rating' not in request.GET and 'max_price' not in request.GET and 'min_price' not in request.GET %}
+                        <center><h2><b> You may have to add some cars to your database Ｏ(≧▽≦)ＯＯ(≧▽≦)Ｏ</b></h2></center>
+                    {% else %}
+                        {% if 'max_price' in request.GET and 'min_price' in request.GET and 'selected_rating' in request.GET%}
+                            <center><h2><b>Sorry but we have no car with {{selected_rating}} stars, in the price range ({{min_price}}-{{max_price}}), in {{ city }} , at {{ pick_up_date }} ( {{ pick_up_time }} )</b></h2></center>
+                        {% elif 'selected_rating' in request.GET %}
+                            <center><h2><b>Sorry but we have no car with {{selected_rating}} stars, in {{ city }} , at {{ pick_up_date }} ( {{ pick_up_time }} )</b></h2></center>
+                        {% else %}
+                            <center><h2><b>Sorry but we have no car with the price range ({{min_price}}-{{max_price}}), in {{ city }} , at {{ pick_up_date }} ( {{ pick_up_time }} )</b></h2></center>
+                        {% endif %}
+                    {% endif %}
+
+                {% endif %}
+            {% else %}
+                <center><h2><b> Search for a car to see some results ! </b></h2></center>
+            {% endif %}
+        {% endif %}
+      {% elif long is True %}
+        <center><h2 class="text-warning"><b> Please choose a closer pick-up time. </b></h2></center>
+        <center><h5 style="color: white;">  Choose a pick-up date in the next 15 days. See <a href="#" style="color: orange;">Our policy</a> </h5></center>
+      {% endif %}
+    {% endif %}
+</div>
+
+<script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- a bunch of scripts that should go in their own files, but I'm lazy now (same thing for the styles above :)) )-->
+
+
+<!-- this script is for the by-rating filter -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var stars = document.querySelectorAll('.star');
+        var starRatingFilter = document.getElementById('star-rating-filter');
+        var selectedRating = parseInt("{{ selected_rating }}") || 0;
+        var selectedStarIndex = selectedRating - 1;
+        var currentUrl = starRatingFilter.getAttribute('data-url');
+
+        function colorStars(index) {
+            stars.forEach(function(star, i) {
+                if (i <= index) {
+                    star.classList.add('selected');
+                } else {
+                    star.classList.remove('selected');
+                }
+            });
+        }
+
+        colorStars(selectedStarIndex);
+
+        stars.forEach(function(star, index) {
+            star.addEventListener('mouseenter', function() {
+                //this.classList.add('hover');
+                stars.forEach(function(star, i) {
+                    if (i <= index) {
+                        star.classList.add('hover');
+                    } else {
+                        star.classList.remove('hover');
+                    }
+                });
+            });
+
+            star.addEventListener('mouseleave', function() {
+                this.classList.remove('hover');
+                var allStars = Array.from(this.parentNode.children);
+                allStars.forEach(function(star) {
+                    star.classList.remove('hover');
+                });
+            });
+
+            star.addEventListener('click', function() {
+
+                var newRating = parseInt(this.dataset.value);
+
+                // if the user clicks the same rating twice, remove the filter
+                if (selectedRating == newRating) {
+                    selectedRating = 0; 
+                } else {
+                    selectedRating = newRating;
+                }
+
+                colorStars(index);
+
+                // making the url 
+                var url = currentUrl;
+                var urlParams = new URLSearchParams(url);
+                urlParams.delete('selected_rating');
+
+                if (selectedRating !== 0) {
+                    urlParams.set('selected_rating', selectedRating);
+                }
+                var newUrl = '?' + urlParams.toString();
+                window.location.href = newUrl;
+            });
+        });
+    });
+</script>
+<!-- this script is for the price filter -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var minPriceInput = document.getElementById('min-price');
+        var maxPriceInput = document.getElementById('max-price');
+        var applyFilterBtn = document.getElementById('apply-filter');
+        var clearFilterBtn = document.getElementById('clear-filter');
+        var errorContainer = document.getElementById('error-container');
+        var priceRatingFilter = document.getElementById('price-range-filter');
+        var currentUrl = priceRatingFilter.getAttribute('data-url');
+
+        function updatePriceFilter() {
+            var minPrice = parseFloat(minPriceInput.value);
+            var maxPrice = parseFloat(maxPriceInput.value);
+
+            // Checking for errors
+            if (isNaN(minPrice) || isNaN(maxPrice)) {
+                if (isNaN(minPrice) && isNaN(maxPrice)){
+                    errorContainer.textContent = "Please provide numbers for Min Price and Max Price !";
+                } else if (isNaN(maxPrice)){
+                    errorContainer.textContent = "Please provide a number for Max Price !";
+                } else {
+                    errorContainer.textContent = "Please provide a number for Min Price !";
+                }
+                errorContainer.style.display = 'block';
+                return;
+            }
+            if (minPrice < 0 || maxPrice < 0) {
+                if (minPrice < 0 && maxPrice < 0){
+                    errorContainer.textContent = "The Price Range can't be negative";
+                }else if (minPrice < 0){
+                    errorContainer.textContent = "The Min Price can't be negative";
+                }else{
+                    errorContainer.textContent = "The Max Price can't be negative";
+                }
+                errorContainer.style.display = 'block';
+                return;
+            }
+            if (minPrice !== 0 && maxPrice !== 0 && minPrice >= maxPrice) {
+                errorContainer.textContent = "Minimum price should be less than maximum price.";
+                errorContainer.style.display = 'block';
+                return;
+            }
+
+            // getting the current url and removing existing min and max price parameters
+            var url = currentUrl;
+            var urlParams = new URLSearchParams(url);
+            urlParams.delete('min_price');
+            urlParams.delete('max_price');
+
+            if (minPrice !== 0) {
+                urlParams.set('min_price', minPrice);
+            }
+            if (maxPrice !== 0) {
+                urlParams.set('max_price', maxPrice);
+            }
+            var newUrl = '?' + urlParams.toString();
+            window.location.href = newUrl;
+        }
+
+        function clearPriceFilter() {
+            minPriceInput.value = "0";
+            maxPriceInput.value = "0";
+            updatePriceFilter(); 
+        }
+
+        clearFilterBtn.addEventListener('click', function() {
+            errorContainer.textContent = ""; // clear previous error message
+            errorContainer.style.display = 'none';
+            clearPriceFilter();
+        });
+
+        applyFilterBtn.addEventListener('click', function() {
+            errorContainer.textContent = ""; // clear previous error message
+            errorContainer.style.display = 'none';
+            updatePriceFilter();
+        });
+    });
+</script>
+<!-- this is to open the date picker if the user didn't choose a period after trying to book a car -->
+<script>
+    window.onload = function() {
+        var noDatetime = {% if no_datetime %}true{% else %}false{% endif %};
+
+        if (noDatetime) {
+            document.getElementById('datepicker').focus();
+        }
+    };
+</script>
+</body>
+</html>

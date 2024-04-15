@@ -1,0 +1,13 @@
+{% extends "star_ratings/widget_base.html" %}
+{% block rating_detail %}
+<div class="container">
+  <span id="rateMe1"></span>
+</div>
+
+<script>
+    // Rating Initialization
+$(document).ready(function() {
+  $('#rateMe1').mdbRate();
+});
+</script>
+{% endblock %}
