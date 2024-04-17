@@ -20,11 +20,39 @@ import json
 
 
 def index(request):
-    hotel = Hotel.objects.filter(status="Live")
-    context = {
+    if request.method == 'POST':
+        search = request.POST.get('search').upper()
+        if search == 'ALL':
+            hotel = Hotel.objects.all()
+            context = {
+            "hotel":hotel
+            }
+            return render(request, "hotel/index.html", context)
+        hotel = Hotel.objects.filter(country=search)
+        context = {
+            "hotel":hotel
+        }
+        return render(request, "hotel/index.html", context)
+    if request.GET.get('from'):
+            request.session['from'] = request.GET.get('from')
+            hotel = Hotel.objects.filter(country=request.GET.get('from').upper())
+            context = {
+            "hotel":hotel
+            }
+            return render(request, "hotel/index.html", context)
+    else:
+        if request.session.get('from'):
+            hotel = Hotel.objects.filter(country=request.session.get('from').upper())
+            context = {
         "hotel":hotel
-    }
-    return render(request, "hotel/index.html", context)
+        }
+            return render(request, "hotel/index.html", context)
+        else:
+            hotel = Hotel.objects.filter(status="Live")
+            context = {
+                "hotel":hotel
+            }
+            return render(request, "hotel/index.html", context)
 
 
 def hotel_detail(request, slug):

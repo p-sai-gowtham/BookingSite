@@ -157,6 +157,6 @@ function to_selected() {
     from.dataset.value = 'DZ';
 }
 
-function imgselected(destination) {
-    window.location.href = '?to=' + destination;
+function imgselected(origin) {
+    window.location.href = '?from=' + origin;
 }

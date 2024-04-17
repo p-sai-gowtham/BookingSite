@@ -41,12 +41,32 @@ def my_login_required(function):
         return function(request, *args, **kwargs)
     return wrapper
 
+country_code = {
+    'DZ': 'Algeria',
+    'JFK': 'New York',
+    'CDG': 'Paris',
+    'LHR': 'London',
+    'NRT': 'Japan',
+    'SIN': 'Singapore',
+    'DOH': 'Qatar',
+}
+
+country = {
+    'Algeria': 'DZ',
+    'New York': 'JFK',
+    'Paris': 'CDG',
+    'London': 'LHR',
+    'Japan': 'NRT',
+    'Singapore': 'SIN',
+    'Qatar': 'DOH',
+}
+
 @login_required
 def index(request):
     min_date = f"{datetime.now().date().year}-{datetime.now().date().month}-{datetime.now().date().day}"
     max_date = f"{datetime.now().date().year if (datetime.now().date().month+3)<=12 else datetime.now().date().year+1}-{(datetime.now().date().month + 3) if (datetime.now().date().month+3)<=12 else (datetime.now().date().month+3-12)}-{datetime.now().date().day}"
     
-
+    print(request.session.get('from'))
     if request.method == 'POST':
         origin = request.POST.get('Origin')
         destination = request.POST.get('Destination')
@@ -74,25 +94,29 @@ def index(request):
             'return_date': return_date
         })
     else:
-        if request.GET.get('to'):
-            request.session['to'] = request.GET.get('to')
+        if request.GET.get('from'):
+            request.session['from'] = country_code[request.GET.get('from')]
             return render(request, 'flight/index.html', {
-                'origin': 'DZ',
-                'destination': request.GET.get('to'),
+                'origin': request.GET.get('from'),
+                'destination': 'DZ',
                 'depart_date': None,
                 'seat': None,
                 'trip_type': None,
             })
-        elif not request.GET.get('to'):
-            if request.session.get('to'):
-                del request.session['to']
-            return render(request, 'flight/index.html', {
-                'min_date': min_date,
-                'max_date': max_date
-            })
-        return render(request, 'flight/index.html', {
-        'origin': 'DZ',
-        'destination': request.session.get('to'),
+        else:
+            if request.session.get('from'):
+
+                return render(request, 'flight/index.html', {
+        'origin': country[request.session.get('from')],
+        'destination': 'DZ',
+        'depart_date': None,
+        'seat': None,
+        'trip_type': None,
+        })
+            else:
+                return render(request, 'flight/index.html', {
+                    'origin': '',
+        'destination': '',
         'depart_date': None,
         'seat': None,
         'trip_type': None,
@@ -132,7 +156,7 @@ def register_view(request):
                 "message": "Passwords must match."
             })
 
-        # Attempt to create new user
+        # Attempt from create new user
         try:
             user = User.objects.create_user(username, email, password)
             user.first_name = fname

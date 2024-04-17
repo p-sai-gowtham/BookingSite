@@ -35,7 +35,7 @@ $(document).ready(function(){
 
 
         $.ajax({
-            url:'/booking/add_to_selection/',
+            url:'/hotel/booking/add_to_selection/',
             data: {
                 'id': id,
                 'hotel_id': hotel_id,

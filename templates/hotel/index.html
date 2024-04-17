@@ -12,7 +12,9 @@
                             <h4>Discover top rated hotels, shops and restaurants around the world</h4>
                             <div class="main_input_search_part">
                                 <div class="main_input_search_part_item">
-                                    <input type="text" placeholder="Hotel, City..." value="" />
+                                    <form method="post">
+                                        {% csrf_token %}
+                                    <input type="text" placeholder="Hotel, City..." value="{{ request.session.from }}" name="search" />
                                 </div>
                                 <div class="main_input_search_part_item main-search-input-item search-input-icon">
                                     <input type="text" placeholder="Select Booking Date" id="booking-date-search">
@@ -28,6 +30,7 @@
 							</select>
                                 </div>
                                 <button class="button" >Search</button>
+                            </form>
                             </div>
                         </div>
                     </div>
@@ -97,7 +100,7 @@
                     <div class="row">
                         <div class="col-md-4 col-sm-6 col-xs-12">
                             <div class="category_container_item_part">
-                                <a href="#" class="category_item_box">
+                                <a href="?from=New York" class="category_item_box">
                                     <div class="featured-type featured">
                                         Top <br>Featured
                                     </div>
@@ -113,11 +116,11 @@
 
                         <div class="col-md-4 col-sm-6 col-xs-12">
                             <div class="category_container_item_part">
-                                <a href="#" class="category_item_box"> 
+                                <a href="?from=Paris" class="category_item_box"> 
 					<img src="{% static 'images/category-box-02.jpg' %}" alt=""/>
 					 <span class="category_item_box_btn">Browse</span>
 					  <div class="category_content_box_part">
-						<h3>Chicago</h3>
+						<h3>Paris</h3>
 						<span>27 Listings</span> 
 					  </div>
 					</a>
@@ -126,11 +129,11 @@
 
                         <div class="col-md-4 col-sm-6 col-xs-12">
                             <div class="category_container_item_part">
-                                <a href="#" class="category_item_box"> 
+                                <a href="?from=London" class="category_item_box"> 
 					  <img src="{% static 'images/category-box-03.jpg' %}" alt=""/>
 					  <span class="category_item_box_btn">Browse</span>
 						<div class="category_content_box_part">
-						  <h3>Los Angeles</h3>
+						  <h3>London</h3>
 						  <span>22 Listings</span> 
 						</div>
 					</a>
@@ -139,11 +142,11 @@
 
                         <div class="col-md-4 col-sm-6 col-xs-12">
                             <div class="category_container_item_part">
-                                <a href="#" class="category_item_box"> 
+                                <a href="?from=Japan" class="category_item_box"> 
 					 <img src="{% static 'images/category-box-04.jpg' %}" alt=""/> 
 					 <span class="category_item_box_btn">Browse</span>
 					  <div class="category_content_box_part">
-						<h3>San Francisco</h3>
+						<h3>Japan</h3>
 						<span>15 Listings</span> 
 					  </div>
 					</a>
@@ -151,14 +154,14 @@
                         </div>
                         <div class="col-md-4 col-sm-6 col-xs-12">
                             <div class="category_container_item_part">
-                                <a href="#" class="category_item_box">
+                                <a href="?from=Singapore" class="category_item_box">
                                     <div class="featured-type featured">
                                         Top <br>Rated City
                                     </div>
                                     <img src="{% static 'images/category-box-05.jpg' %}" alt="" />
                                     <span class="category_item_box_btn">Browse</span>
                                     <div class="category_content_box_part">
-                                        <h3>Washington</h3>
+                                        <h3>Singapore</h3>
                                         <span>26 Listings</span>
                                     </div>
                                 </a>
@@ -167,11 +170,11 @@
 
                         <div class="col-md-4 col-sm-6 col-xs-12">
                             <div class="category_container_item_part">
-                                <a href="#" class="category_item_box"> 
+                                <a href="?from=Qatar" class="category_item_box"> 
 					<img src="{% static 'images/category-box-06.jpg' %}" alt=""/>
 					 <span class="category_item_box_btn">Browse</span>
 					  <div class="category_content_box_part">
-						<h3>Seattle</h3>
+						<h3>Qatar</h3>
 						<span>27 Listings</span> 
 					  </div>
 					</a>
