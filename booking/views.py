@@ -62,7 +62,7 @@ def add_to_selection(request):
         'adult': request.GET['adult'],
         'children': request.GET['children'],
     }
-
+    print(room_selection)
     if 'selection_data_obj' in request.session:
         if str(request.GET['id']) in request.session['selection_data_obj']:
 

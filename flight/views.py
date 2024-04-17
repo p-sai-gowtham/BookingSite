@@ -32,17 +32,20 @@ except:
 
 # Create your views here.
 
+from django.contrib.auth.decorators import login_required
+
+def my_login_required(function):
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('userauths:sign-up')
+        return function(request, *args, **kwargs)
+    return wrapper
+
+@login_required
 def index(request):
     min_date = f"{datetime.now().date().year}-{datetime.now().date().month}-{datetime.now().date().day}"
     max_date = f"{datetime.now().date().year if (datetime.now().date().month+3)<=12 else datetime.now().date().year+1}-{(datetime.now().date().month + 3) if (datetime.now().date().month+3)<=12 else (datetime.now().date().month+3-12)}-{datetime.now().date().day}"
-    if request.GET.get('to'):
-        return render(request, 'flight/index.html', {
-            'origin': 'DZ',
-            'destination': request.GET.get('to'),
-            'depart_date': None,
-            'seat': None,
-            'trip_type': None,
-        })
+    
 
     if request.method == 'POST':
         origin = request.POST.get('Origin')
@@ -71,9 +74,28 @@ def index(request):
             'return_date': return_date
         })
     else:
+        if request.GET.get('to'):
+            request.session['to'] = request.GET.get('to')
+            return render(request, 'flight/index.html', {
+                'origin': 'DZ',
+                'destination': request.GET.get('to'),
+                'depart_date': None,
+                'seat': None,
+                'trip_type': None,
+            })
+        elif not request.GET.get('to'):
+            if request.session.get('to'):
+                del request.session['to']
+            return render(request, 'flight/index.html', {
+                'min_date': min_date,
+                'max_date': max_date
+            })
         return render(request, 'flight/index.html', {
-            'min_date': min_date,
-            'max_date': max_date
+        'origin': 'DZ',
+        'destination': request.session.get('to'),
+        'depart_date': None,
+        'seat': None,
+        'trip_type': None,
         })
 
 def login_view(request):

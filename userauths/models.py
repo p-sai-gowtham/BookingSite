@@ -112,4 +112,3 @@ def delete_image_file(sender, instance, **kwargs):
         image_path = instance.image.path
         if os.path.exists(image_path):
             os.remove(image_path)
-

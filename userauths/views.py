@@ -13,9 +13,10 @@ from userauths.forms import UserRegisterForm
 def RegisterView(request, *args, **kwargs):
     if request.user.is_authenticated:
         messages.warning(request, f"Hey {request.user.username}, you are already logged in")
-        return redirect('hotel:index')   
+        return redirect('/')   
 
     form = UserRegisterForm(request.POST or None)
+    print()
     if form.is_valid():
         form.save()
         full_name = form.cleaned_data.get('full_name')
@@ -33,10 +34,10 @@ def RegisterView(request, *args, **kwargs):
         profile.phone = phone
         profile.save()
 
-        return redirect('hotel:index')
+        return redirect('/')
     
     context = {'form':form}
-    return render(request, 'userauths/sign-up.html', context)
+    return render(request, 'login.html', context)
 
 def LoginView(request):
     # if request.user.is_authenticated:
@@ -54,7 +55,7 @@ def LoginView(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, "You are Logged In")
-                return redirect('hotel:index')
+                return redirect('/')
             else:
                 messages.error(request, 'Username or password does not exit.')
         
@@ -89,8 +90,10 @@ def loginViewTemp(request):
         
         except:
             messages.error(request, 'User does not exist')
+    form = UserRegisterForm(request.POST or None)
 
-    return render(request, "userauths/sign-in.html")
+    context = {'form':form}
+    return render(request, 'login.html', context)
 
 
 
